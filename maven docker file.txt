@@ -1,0 +1,96 @@
+#
+# for build
+#
+FROM maven:3.6.3-jdk-11-slim AS MAVEN_TOOL_CHAIN
+
+COPY pom.xml /tmp/
+
+COPY src /tmp/src/
+
+WORKDIR /tmp/
+
+RUN mvn package
+
+
+#
+# for deploy
+#
+FROM tomcat:9.0-alpine
+
+MAINTAINER "admin"
+
+USER root
+
+# to get access to admin page
+COPY /tomcat-users.xml $CATALINA_HOME/conf/tomcat-users.xml
+COPY /settings.xml $CATALINA_HOME/conf/settings.xml
+COPY /context.xml /usr/local/tomcat/webapps/manager/META-INF/
+
+WORKDIR $CATALINA_HOME/webapps/
+
+COPY --from=MAVEN_TOOL_CHAIN /tmp/target/LESM-Status-Monitor-0.0.1-SNAPSHOT.war ./LESM-Status-Monitor.war
+
+EXPOSE 8080
+
+CMD ["catalina.sh", "run"
+
+----------------------------
+FROM centos
+RUN yum -y install java-1.8* git wget initscripts
+RUN wget -O /etc/yum.repos.d/jenkins.repo https://pkg.jenkins.io/redhat-stable/jenkins.repo
+RUN rpm --import https://pkg.jenkins.io/redhat-stable/jenkins.io.key
+RUN yum install jenkins -y
+#FROM jenkins/jenkins:lts
+#USR root
+#RUN apt install java
+RUN mkdir /opt/maven
+WORKDIR /opt/maven
+ADD https://mirrors.gigenet.com/apache/maven/maven-3/3.6.3/binaries/apache-maven-3.6.3-bin.tar.gz /opt/maven
+RUN tar -xvzf apache-maven-3.6.3-bin.tar.gz
+RUN mv apache-maven-3.6.3/* .
+ENV M2_HOME=/opt/maven
+ENV M2=/opt/maven/bin
+ENV PATH=$PATH:$M2_HOME:$M2
+CMD["service", "jenkins", "start"]
+
+
+---------------------------------------------------------
+tomcat dockerfile 
+
+
+FROM centos
+RUN yum install java -y
+RUN mkdir /opt/tomcat/
+WORKDIR /opt/tomcat
+ADD https://dlcdn.apache.org/tomcat/tomcat-9/v9.0.54/bin/apache-tomcat-9.0.54.tar.gz /opt/tomcat
+RUN tar xvfz apache*.tar.gz
+RUN mv apache-tomcat-9.0.54/* /opt/tomcat 
+EXPOSE 8080
+CMD ["/opt/tomcat/bin/catalina.sh", "run"]
+
+--------------------------------------------------------------------------------------------------
+apche2
+
+
+# This is apache web server on Ubuntu server
+
+FROM ubuntu:12.04
+
+MAINTAINER Ravi Shankar <arsr319@gmail.com>
+
+LABEL version="1.0" \
+        release="2017-10-07"
+
+RUN apt-get update && apt-get install -y apache2 && apt-get clean
+
+ENV APACHE_RUN_USER www-data
+ENV APACHE_RUN_GROUP www-data
+ENV APACHE_LOG_DIR  /var/log
+
+EXPOSE 80
+
+COPY index.html /var/www/html
+
+CMD ["/usr/sbin/apache2","-D","FOREGROUND"]
+---------------------------------------------------------------------------------------------------------
+

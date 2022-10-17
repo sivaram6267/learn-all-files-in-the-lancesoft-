@@ -1,0 +1,58 @@
+
+
+java project deploment in docker 
+-----------------
+java docker file 
+
+FROM tomcat:8.0.20-jre8
+# Dummy text to test 
+COPY target/java-web-app*.war /usr/local/tomcat/webapps/java-web-app.war
+
+-------------------------------------------------------------------------------------------------------
+FROM node:latest
+WORKDIR /usr/src/EmployeeTracker
+COPY nodeapp/* /
+RUN npm install
+EXPOSE 3000
+CMD [ "npm","start" ]
+------------------------------
+FROM node:alpine
+WORKDIR /root/react/EmployeeTracker
+ENV PATH /EmployeeTracker/node_modules/.bin:$PATH
+COPY package.json ./
+COPY package-lock.json ./
+RUN npm install
+RUN npm run build
+COPY . ./
+CMD ["npm", "start"]
+------------------------------------------------------------------------------------------------------
+
+
+# Node.js Dockerfile
+#
+# https://github.com/dockerfile/nodejs
+#
+
+# Pull base image.
+FROM dockerfile/python
+
+# Install Node.js
+RUN \
+  cd /tmp && \
+  wget http://nodejs.org/dist/node-latest.tar.gz && \
+  tar xvzf node-latest.tar.gz && \
+  rm -f node-latest.tar.gz && \
+  cd node-v* && \
+  ./configure && \
+  CXX="g++ -Wno-unused-local-typedefs" make && \
+  CXX="g++ -Wno-unused-local-typedefs" make install && \
+  cd /tmp && \
+  rm -rf /tmp/node-v* && \
+  npm install -g npm && \
+  printf '\n# Node.js\nexport PATH="node_modules/.bin:$PATH"' >> /root/.bashrc
+
+# Define working directory.
+WORKDIR /data
+
+# Define default command.
+CMD ["bash"]

@@ -1,0 +1,29 @@
+ 1  apt-get update
+    2  cd /
+    3  sudo apt install maven
+    4  mvn --version
+    5  wget -q -O - https://pkg.jenkins.io/debian-stable/jenkins.io.key | sudo apt-key add -
+    6  sudo sh -c 'echo deb http://pkg.jenkins.io/debian-stable binary/ > /etc/apt/sources.list.d/jenkins.list'
+    7  sudo apt update
+    8  sudo apt install jenkins
+    9  sudo systemctl start jenkins
+   10  sudo systemctl status jenkins
+   11  sudo systemctl enable jenkins
+
+-----------------------------------------------------
+
+    1. sudo apt-get update
+    2  sudo apt-get install default-jre
+    3  sudo apt-get install default-jdk
+    4  sudo wget -q -O — http://pkg.jenkins-ci.org/debian/jenkins-ci.org.key | sudo apt-key add -
+    5  sudo sh -c 'echo deb http://pkg.jenkins.io/debian-stable binary/ > /etc/apt/sources.list.d/jenkins.list'
+    6  sudo apt-get update
+    7  sudo apt-get install jenkins
+    8  sudo systemctl start jenkins
+    9  sudo systemctl enable jenkins
+   10  sudo systemctl status jenkins
+   11  cat /var/lib/jenkins/secrets/initialAdminPassword
+   12  apt-get update && apt-get upgrade && apt-get install curl gnupg2 gcc g++ make libssl-dev -y
+   13  curl -sL https://deb.nodesource.com/setup_current.x -o nodesource_setup.sh && bash nodesource_setup.sh
+   14  apt-get install nodejs -y && npm install npm@latest -g
+   15  node --version && npm --version

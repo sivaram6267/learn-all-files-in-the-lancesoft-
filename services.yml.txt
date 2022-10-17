@@ -1,0 +1,48 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: valaxy-service
+  labels:
+    app: valaxy-devops-project
+spec:
+  selector:
+    app: valaxy-devops-project
+  type: LoadBalancer
+  ports:
+    - port: 8080
+      targetPort: 8080
+      nodePort: 31200
+---------------------------
+apiVersion: v1
+kind: Service
+metadata:
+  name: valaxy-service
+  labels:
+    app: regapp 
+spec:
+  selector:
+    app: regapp 
+
+  ports:
+    - port: 8080
+      targetPort: 8080
+
+  type: LoadBalancer
+
+15siva15.in.k8s002233
+
+kubeadm join 172.31.35.72:6443 --token lm5bz2.iaw7pioegovwqqhc \
+        --discovery-token-ca-cert-hash sha256:3bb5d18fb2ba2c0661f19e8b58d19c5b4309b788f434f9b22426ef7c7e563481
+
+kops create cluster \
+--state=${KOPS_STATE_STORE} \
+--node-count=2 \
+--master-size=t3.medium \
+--node-size=t3.medium \
+--zones=us-east-2a \
+--name=${KOPS_CLUSTER_NAME} \
+--dns private \
+--master-count 1
+
+
+kops create cluster --cloud=aws --zones=us-east-2 --name=15siva15.in.k8s002233  --dns private

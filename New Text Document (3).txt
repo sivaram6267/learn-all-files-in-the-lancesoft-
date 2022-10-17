@@ -1,0 +1,65 @@
+Simple DevOps Project CI CD Using Node JS
+
+Steps 1 - Install Node Js on amazone ec2 Machine
+
+
+
+
+ 
+Step 2 - Download the Publish Over SSH plugins
+Login to Jenkins console and add Docker server to execute commands from Jenkins
+Manage Jenkins --> Configure system --> Publish over SSH --> add Docker server and credentials
+
+
+Key -- define the private Key ( you will get from .pem while when you will open as text file)
+
+ssh Server - 
+
+Name - define the name of the server.
+HostName - Provide the IP address of your server.
+UserName - Provide the user name here ex. if we are using Ubuntu ec2 instance then username is ubuntu
+
+Click Save and Apply 
+Step 3 - Create the Free Style Node JS project .
+Git URL - https://github.com/Abhishek08/node-js-sample.git
+
+WebHook Connection URL - http://IPADDRESS/github-webhook/ (push)
+
+BUILD - npm install
+        npm run build
+        tar czf Node.tar.gz node_modules package.json public package-lock.json build src
+
+
+   
+Step 4 - Post Build Action Define below details.
+
+Source file : **/*.gz 
+
+Exec Command 
+
+mv /home/dockeradmin/Node.tar.gz  Node.tar.gz;
+cd /home/dockeradmin;
+tar -xf Node.tar.gz;
+docker stop raju;
+docker rm raju;
+docker image rm raju;
+docker build -t raju .
+docker run --name raju -itd -p 3000:3000 raju
+
+Step 5 - Docker File in docker server
+
+FROM node:16.15.0
+WORKDIR app
+COPY . .
+EXPOSE 443
+EXPOSE 80
+COPY ./package.json /app
+RUN npm install
+RUN npm run build
+ENV PORT 3000
+EXPOSE 3000
+ENTRYPOINT ["npm", "run","start"]
+
+
+
+ 

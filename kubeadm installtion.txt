@@ -1,0 +1,163 @@
+create sh file 
+ ------------------file name k8s.sh-----------------------------------------masternode-----------------
+paste inside file below commands
+
+vi k8s.sh
+
+#!/bin/bash
+sudo apt update
+sudo apt install -y docker.io
+echo " {
+  "exec-opts": ["native.cgroupdriver=systemd"],
+  "log-driver": "json-file",
+  "log-opts": {
+  "max-size": "100m"
+  },
+  "storage-driver": "overlay2"
+} " >>  /etc/docker/daemon.json
+
+
+
+sudo systemctl enable docker.service --now
+
+sudo sed -i '/ swap / s/^\(.*\)$/#\1/g' /etc/fstab
+sudo swapoff -a
+sudo apt install -y apt-transport-https curl
+sudo curl -fsSLo /usr/share/keyrings/kubernetes-archive-keyring.gpg https://packages.cloud.google.com/apt/doc/apt-key.gpg
+echo "deb [signed-by=/usr/share/keyrings/kubernetes-archive-keyring.gpg] https://apt.kubernetes.io/ kubernetes-xenial main" | sudo tee /etc/apt/sources.list.d/kubernetes.list
+sudo apt-get update
+sudo apt-get install -y kubelet kubeadm kubectl
+sudo apt-mark hold kubelet kubeadm kubectl
+sudo kubeadm init
+mkdir -p $HOME/.kube
+sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
+sudo chown $(id -u):$(id -g) $HOME/.kube/config
+sudo kubectl apply -f "https://cloud.weave.works/k8s/net?k8s-version=$(kubectl version | base64 | tr -d '\n')"
+------
+sh k8s.sh or ./k8s.sh
+---------------------------------------------------worker nodes commands  ---------------------------------
+
+vi k8s.sh
+#!/bin/bash
+sudo apt update
+sudo apt install -y docker.io
+echo " {
+  "exec-opts": ["native.cgroupdriver=systemd"],
+  "log-driver": "json-file",
+  "log-opts": {
+  "max-size": "100m"
+  },
+  "storage-driver": "overlay2"
+} " >>  /etc/docker/daemon.json
+
+
+
+sudo systemctl enable docker.service --now
+
+sudo sed -i '/ swap / s/^\(.*\)$/#\1/g' /etc/fstab
+sudo swapoff -a
+sudo apt install -y apt-transport-https curl
+sudo curl -fsSLo /usr/share/keyrings/kubernetes-archive-keyring.gpg https://packages.cloud.google.com/apt/doc/apt-key.gpg
+echo "deb [signed-by=/usr/share/keyrings/kubernetes-archive-keyring.gpg] https://apt.kubernetes.io/ kubernetes-xenial main" | sudo tee /etc/apt/sources.list.d/kubernetes.list
+sudo apt-get update
+sudo apt-get install -y kubelet kubeadm kubectl
+sudo apt-mark hold kubelet kubeadm kubectl
+--------
+sh k8s.sh or ./k8s.sh
+----------
+Join the Worker Nodes to Kubernetes Cluster
+sudo kubeadm geneteate nodekey copy in master node and past in worker node
+
+sudo kubeadm join 192.168.1.234:6443 --token axwp1d.XXXXXXXXXX \
+ --discovery-token-ca-cert-hash sha256:XXXXXXXXXXXXXXXXXXXXXXXXXXXXXX1e74
+----------------------------------------------------------------------------------------
+vi nginx-deployment.yml
+ 
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx-deployment
+  labels:
+    app: nginx
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: nginx
+  template:
+    metadata:
+      labels:
+        app: nginx
+    spec:
+      containers:
+      - name: nginx
+        image: nginx:1.14.2
+        ports:
+        - containerPort: 80
+----------------------------------------------------------------------------------------------
+kubectl apply -f nginx-deployment.yml
+---------------------------------------------------------------------------------------------------------
+
+vi nginx-service.yml
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: nginx-service
+  labels:
+    app: nginx
+spec:
+  selector:
+    app: nginx
+  type: LoadBalancer
+  ports:
+    - port: 8080
+      targetPort: 80
+      nodePort: 31100
+----------------------------------------------------------------------------------------
+kubectl apply -f nginx-serive.yml
+-------------------------------------------------------------------------------------------------------------------------------
+kubectl get all 
+kubectl get nodes 
+kubectl get pods
+kubectl get deployment 
+kubectl get nodes -o wide 
+kubectl get pods -o wide 
+kubectl get replicaset 
+kubectl get serive -o wide 
+------------------------------commands-------------------------------------------------------------
+
+CREATING DEPLOYMENT
+kubectl create -f deploy.yml
+kubectl describe deploy nginx-deploy
+kubectl get rs
+kubectl describe rs
+kubectl get deploy
+kubectl delete deploy/nginx-deploy
+kubectl delete rs/nginx-deploy-6858bf488c
+
+-------------------------------------------------------------
+
+ROLLING UPDATE TO THE DEPLOYMENT
+kubectl apply -f deploy.yml --record
+kubectl rollout status deployments nginx-deploy
+kubectl get deploy nginx-deploy
+kubectl rollout history deployments nginx-deploy
+kubectl get rs
+-------------------------------------------------------------
+UNDO ROLLED back
+kubectl describe deploy myjavaapp-deploy
+kubectl rollout undo deployment nginx-deploy --to-revision=1
+kubectl get deploy
+kubectl rollout status deployments nginx-deploy
+kubectl rollout history deployments nginx-deploy
+--------------------------------------------------------------
+For Updating:
+kubectl --record deployment.apps/nginx-deploy set image
+deployment.v1.apps/myjavaapp-deploy
+myjavaapp-container=maha4iac/myonlineapp25oct21:2
+kubectl rollout status deployments nginx-deploy
+kubectl rollout history deployments nginx-deploy
+--------------------------------------------------------------------------------------------------------
+
+

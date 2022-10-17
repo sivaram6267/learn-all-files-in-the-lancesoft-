@@ -1,0 +1,19 @@
+Create a Freestyle Project
+Create a new job
+Job Name : WebhookTestJob
+
+Source code management
+Git URL : get URL here
+Build Triggers
+ GitHub hook trigger for GITScm polling
+Build --> Add Build Step --> Invoke Top Level Maven Triggers
+
+Maven Version: Maven
+Goals: clean install
+On GitHub repository
+
+repository --> settings --> webhooks
+
+Add webhook
+Payload URL : Jenkins_IP>:8080/github-webhook/
+Content type : Application/JSON

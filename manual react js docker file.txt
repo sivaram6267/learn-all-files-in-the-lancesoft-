@@ -1,0 +1,58 @@
+git clone (*url)
+cd empolyee tracker
+*create the docker file
+
+*vi dockerfile
+--------------------------------
+# build environment
+FROM node:13.12.0-alpine as build
+WORKDIR /app
+ENV PATH /app/node_modules/.bin:$PATH
+COPY package.json ./
+COPY package-lock.json ./
+RUN npm ci --silent
+RUN npm install react-scripts@3.4.1 -g --silent
+COPY . ./
+RUN npm run build
+
+# production environment
+FROM nginx:stable-alpine
+COPY --from=build /app/build /usr/share/nginx/html
+# new
+COPY nginx/nginx.conf /etc/nginx/conf.d/default.conf
+EXPOSE 80
+CMD ["nginx", "-g", "daemon off;"]
+~                                    
+-------------------------------
+* mkdir nginx
+
+* vi nginx.conf 
+
+server {
+
+  listen 80;
+
+  location / {
+    root   /usr/share/nginx/html;
+    index  index.html index.htm;
+    try_files $uri $uri/ /index.html;
+  }
+
+  error_page   500 502 503 504  /50x.html;
+
+  location = /50x.html {
+    root   /usr/share/nginx/html;
+   }
+---------------------------------------------------------------
+*Run the docker file
+
+*command:- docker build -t (dockerfile name) .
+
+*checking the docker image
+
+*Run the docker container by using docker image
+
+*Docker run --name (given the  container name) -it -p 8080:80 (image id/name)
+ example:-* docker run -name shiva -it -p 8080:80  cdfer234haj
+
+*docker start container (name)
